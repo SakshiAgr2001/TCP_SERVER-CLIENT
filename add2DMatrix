@@ -1,0 +1,100 @@
+Use python programming language to write a client program and server program.
+The client program prompt the user enter the input and pass it to the server. The server program
+computes and pass to the client. Client program displays the Answer on the screen.
+
+
+a) Addition of two dimensional matrix 
+
+SOLUTION FOR Addition of two dimensional matrix 
+server.py
+import socket
+import math
+from signal import signal, SIGINT
+from sys import exit
+import json
+
+def handler(signal_received, frame):
+    # Handle any cleanup here
+    print('SIGINT or CTRL-C detected. Exiting gracefully')
+    exit(0)
+
+signal(SIGINT, handler) 
+port=80
+host=socket.gethostname()
+s=socket.socket()
+s.bind((host,port))
+s.listen()
+print('server started: ', host, port)
+while True:
+    try:
+        c, a=s.accept()
+        print(f"connection from {a}")
+     
+        json_data = c.recv(1024).decode("utf-8")
+        print(f"received json_data {json_data}")
+
+        data = json.loads(json_data) 
+        n = data["dimension"]
+        A = data["a"]
+        B = data["b"]
+        
+        result = [[0]*n]*n
+      
+        for i in range(n): 
+            for j in range(n):
+                #print(f"{i}, {j}")
+                result[i][j] = A[i][j] + B[i][j]
+        
+        res_json = json.dumps(result)
+        print(f"result: {res_json}")
+        c.sendall(res_json.encode("utf-8"))
+    except KeyboardInterrupt:
+        break
+
+
+
+client.py
+import socket
+import json
+
+host=socket.gethostname()
+port=80
+s=socket.socket()
+s.connect((host,port))
+print("connected to server successfully...")
+
+A=[]
+B=[]
+
+a=input('Enter N*N size for matrix 1 and 2: ')
+n = int(a)
+
+print("Enter val for matrix 1: ")
+for i in range(n):  
+    ar =[]
+    for j in range(n):  
+        ar.append(int(input()))
+    A.append(ar)
+
+print("Enter val for matrix2: ")
+for i in range(n):  
+    ar =[]
+    for j in range(n):  
+        ar.append(int(input()))
+    B.append(ar)
+
+data = {}
+data["dimension"] = n
+data["a"] = A
+data["b"] = B
+
+json_data = json.dumps(data)
+
+# data json
+print("sending data: ", json_data)
+s.sendall(json_data.encode("utf-8"))
+
+# response
+res_json = s.recv(1024).decode() 
+print(f"result: {res_json}")
+s.close()
