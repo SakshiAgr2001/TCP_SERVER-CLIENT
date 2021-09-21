@@ -1,0 +1,80 @@
+Sorting values in ascending and descending order
+
+server.py
+import socket
+import math
+from signal import signal, SIGINT
+from sys import exit
+import json
+
+def handler(signal_received, frame):
+    # Handle any cleanup here
+    print('SIGINT or CTRL-C detected. Exiting gracefully')
+    exit(0)
+
+signal(SIGINT, handler) 
+port=80
+host=socket.gethostname()
+s=socket.socket()
+s.bind((host,port))
+s.listen()
+print('server started: ', host, port)
+while True:
+    try:
+        c, a=s.accept()
+        print(f"connection from {a}")
+     
+        json_data = c.recv(1024).decode("utf-8")
+        print(f"received json_data {json_data}")
+
+        data = json.loads(json_data) 
+        n = data["dimension"]
+        st = data["st"]
+        
+        st.sort()
+       
+        asc_json = json.dumps(st)
+        print(f"result: {asc_json}")
+        st.sort(reverse=True)
+        asc_json = json.dumps(st)
+        
+        print(f"result: {asc_json}")
+       
+       
+    except KeyboardInterrupt:
+        break
+  
+ client.py
+ 
+ import socket
+import json
+
+host=socket.gethostname()
+port=80
+s=socket.socket()
+s.connect((host,port))
+print("connected to server successfully...")
+
+st=[]
+
+a=input('Enter n number of elements:  ')
+n = int(a)
+
+print("Enter elements ")
+for i in range(n):  
+    st.append(int(input()))
+
+data = {}
+data["dimension"] = n
+data["st"] = st
+
+json_data = json.dumps(data)
+
+# data json
+print("sending data: ", json_data)
+s.sendall(json_data.encode("utf-8"))
+
+# response
+res_json = s.recv(1024).decode() 
+print(f"result: {res_json}")
+s.close()
