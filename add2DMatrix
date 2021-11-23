@@ -38,18 +38,26 @@ while True:
         A = data["a"]
         B = data["b"]
         
-        result = [[0]*n]*n
+        result = []
       
         for i in range(n): 
+            sum = []
             for j in range(n):
-                #print(f"{i}, {j}")
-                result[i][j] = A[i][j] + B[i][j]
+               
+                sum.append(A[i][j] + B[i][j])
+            result.append(sum)
+                
+         
+
         
         res_json = json.dumps(result)
         print(f"result: {res_json}")
         c.sendall(res_json.encode("utf-8"))
     except KeyboardInterrupt:
         break
+
+
+           
 
 
 
